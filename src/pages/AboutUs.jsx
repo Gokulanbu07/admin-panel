@@ -273,8 +273,8 @@ const AboutUs = () => {
                                     className="team-member-img"
                                     alt="Vasanth"
                                 />
-                                <div className="team-member-name">Vasanth</div>
-                                <div className="team-member-role">Lead Agent, Chennai</div>
+                                <div className="team-member-name">Prema</div>
+                                <div className="team-member-role">Managing Director, Chennai</div>
                             </div>
                         </Col>
                         <Col lg={4} md={6}>

@@ -21,9 +21,9 @@ const HomePage = () => {
 
     // --- Placeholder Data for Property Cards (unchanged for now) ---
     const properties = [
-        { id: 1, title: 'Modern Downtown Apartment', price: '$500,000', location: 'New York', imageUrl: 'https://placehold.co/400x300/111118/F5F5F5?text=Apartment' },
-        { id: 2, title: 'Suburban Family House', price: '$850,000', location: 'Texas', imageUrl: 'https://placehold.co/400x300/111118/F5F5F5?text=House' },
-        { id: 3, title: 'Luxury Beachfront Villa', price: '$1,200,000', location: 'Miami', imageUrl: 'https://placehold.co/400x300/111118/F5F5F5?text=Villa' },
+        { id: 1, title: 'Modern Downtown Apartment', price: '500,000', location: 'New York', imageUrl: 'https://placehold.co/400x300/111118/F5F5F5?text=Apartment' },
+        { id: 2, title: 'Suburban Family House', price: '850,000', location: 'Texas', imageUrl: 'https://placehold.co/400x300/111118/F5F5F5?text=House' },
+        { id: 3, title: 'Luxury Beachfront Villa', price: '1,200,000', location: 'Miami', imageUrl: 'https://placehold.co/400x300/111118/F5F5F5?text=Villa' },
     ];
 
         const categories = [

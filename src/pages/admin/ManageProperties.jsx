@@ -1,146 +1,199 @@
-// src/pages/admin/ManageProperties.jsx (UPDATED)
+// src/pages/admin/MyProperties.jsx
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Alert, Spinner, Button } from 'react-bootstrap';
 import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import PropertyTable from '../../components/admin/PropertyTable';
-import PropertyFormModal from '../../components/admin/PropertyFormModal'; // <--- IMPORT MODAL
+import PropertyFormModal from '../../components/admin/PropertyFormModal';
 
-const ManageProperties = () => {
-    const [properties, setProperties] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState(null);
-    
-    // Modal State
-    const [showModal, setShowModal] = useState(false);
-    const [currentProperty, setCurrentProperty] = useState(null); // Null for Add, Object for Edit
+const MyProperties = () => {
+  const { user } = useAuth();
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(null);
 
-    const fetchPropertiesData = async () => {
-        setLoading(true);
-        try {
-            const response = await api.fetchProperties();
-            if (response.success) {
-                // Ensure the properties have all required fields for the form
-                setProperties(response.properties.map(p => ({
-                    ...p,
-                    bedrooms: p.bedrooms || 0,
-                    bathrooms: p.bathrooms || 0,
-                    sq_ft: p.sq_ft || 0,
-                })));
-            }
-        } catch (error) {
-            setMessage({ type: 'danger', text: 'Error fetching properties list.' });
-        } finally {
-            setLoading(false);
-        }
-    };
+  const [showModal, setShowModal] = useState(false);
+  const [currentProperty, setCurrentProperty] = useState(null);
 
-    useEffect(() => {
-        fetchPropertiesData();
-    }, []);
+  const GOLD = '#D4AF37';
 
-    // --- Modal Handlers ---
+  const fetchMyPropertiesData = async () => {
+    setLoading(true);
+    try {
+      const response = await api.fetchProperties();
 
-    const handleShowAdd = () => {
-        setCurrentProperty(null); // Clear for Add mode
-        setShowModal(true);
-    };
+      const mockOwnerId = 1;
+      const myProperties = (response.properties || []).filter(
+        (p) => p.owner_id === mockOwnerId
+      );
 
-    const handleShowEdit = (propertyId) => {
-        const propertyToEdit = properties.find(p => p.id === propertyId);
-        setCurrentProperty(propertyToEdit);
-        setShowModal(true);
-    };
+      if (response.success) {
+        setProperties(myProperties);
+      }
+    } catch {
+      setMessage({
+        type: 'danger',
+        text: 'Error fetching your property listings.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setCurrentProperty(null);
-    };
+  useEffect(() => {
+    fetchMyPropertiesData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    // --- Action Handlers ---
+  // ----- Modal Handlers -----
+  const handleShowAdd = () => {
+    setCurrentProperty(null);
+    setShowModal(true);
+  };
 
-    const handleFormSubmit = (formData) => {
-        setMessage(null);
-        if (currentProperty) {
-            // EDIT LOGIC
-            setMessage({ type: 'success', text: `Successfully updated property: ${formData.title}. (Mock update)` });
-            // Update local state to reflect changes (Mock)
-            setProperties(properties.map(p => p.id === currentProperty.id ? { ...p, ...formData } : p));
-        } else {
-            // ADD LOGIC
-            const newProperty = {
-                ...formData,
-                id: properties.length + 1000, // Mock ID
-                owner_name: "Admin Tester",
-                status: 'Available',
-                created_at: new Date().toISOString().substring(0, 19).replace('T', ' ')
-            };
-            setMessage({ type: 'success', text: `Successfully added new property: ${newProperty.title}. (Mock add)` });
-            // Add to local state (Mock)
-            setProperties([...properties, newProperty]);
-        }
-    };
+  const handleShowEdit = (propertyId) => {
+    const propertyToEdit = properties.find((p) => p.id === propertyId);
+    setCurrentProperty(propertyToEdit);
+    setShowModal(true);
+  };
 
-    const handleDeleteProperty = async (propertyId) => {
-        if (!window.confirm("Are you sure you want to archive this property?")) return;
-        // ... (rest of the delete logic from Step 9 remains the same) ...
-        try {
-            const response = await api.deleteProperty(propertyId);
-            if (response.success) {
-                setMessage({ type: 'success', text: response.message });
-                setProperties(properties.map(p => 
-                    p.id === propertyId ? { ...p, status: 'Archived' } : p
-                ));
-            }
-        } catch (error) {
-            setMessage({ type: 'danger', text: 'An error occurred during archiving.' });
-        }
-    };
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setCurrentProperty(null);
+    fetchMyPropertiesData();
+  };
 
+  // ----- Form Submit (Mock) -----
+  const handleFormSubmit = (formData) => {
+    setMessage(null);
 
-    return (
-        <Container fluid className="p-0">
-            <h2 className="mb-4 fw-bold">🏘️ Manage Properties</h2>
-            
-            <div className="d-flex justify-content-end mb-3">
-                <Button variant="primary-custom" onClick={handleShowAdd}>
-                    <i className="fas fa-plus me-2"></i> Add New Property
-                </Button>
+    if (currentProperty) {
+      setMessage({
+        type: 'success',
+        text: `Updated listing (mock): ${formData.title}`,
+      });
+
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.id === currentProperty.id ? { ...p, ...formData } : p
+        )
+      );
+    } else {
+      const newProperty = {
+        ...formData,
+        id: Math.floor(Math.random() * 10000),
+        owner_id: user?.id || 1,
+        owner_name: user?.full_name || 'Admin',
+        status: 'Available',
+        created_at: new Date().toISOString().substring(0, 19).replace('T', ' '),
+      };
+
+      setMessage({
+        type: 'success',
+        text: `New listing added (mock): ${newProperty.title}`,
+      });
+
+      setProperties((prev) => [...prev, newProperty]);
+    }
+
+    setShowModal(false);
+  };
+
+  // ----- Delete (Mock) -----
+  const handleDeleteProperty = async (propertyId) => {
+    if (!window.confirm('Are you sure you want to archive this property?'))
+      return;
+
+    try {
+      setMessage({
+        type: 'success',
+        text: 'Property archived successfully. (Mock delete)',
+      });
+      setProperties((prev) => prev.filter((p) => p.id !== propertyId));
+    } catch {
+      setMessage({
+        type: 'danger',
+        text: 'An error occurred during archiving.',
+      });
+    }
+  };
+
+  return (
+    <Container fluid className="p-0">
+      {/* Page Title */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 className="fw-bold mb-1" style={{ color: GOLD }}>
+            My Listings
+          </h2>
+          <p className=" mb-0">
+            Manage only the properties owned by you / your account.
+          </p>
+        </div>
+
+        <Button
+          onClick={handleShowAdd}
+          style={{
+            backgroundColor: GOLD,
+            border: 'none',
+            color: '#111',
+            fontWeight: '600',
+            borderRadius: '30px',
+          }}
+        >
+          <i className="fas fa-plus me-2" />
+          Add New Listing
+        </Button>
+      </div>
+
+      {message && (
+        <Alert
+          variant={message.type}
+          onClose={() => setMessage(null)}
+          dismissible
+          className="mb-3"
+        >
+          {message.text}
+        </Alert>
+      )}
+
+      <Card className="card-custom">
+        <Card.Header className="card-header-custom d-flex justify-content-between align-items-center">
+          <span>Your Active Listings</span>
+          <span style={{ fontSize: '.8rem', color: '#aaa' }}>
+            Count: {properties.length}
+          </span>
+        </Card.Header>
+
+        <Card.Body>
+          {loading ? (
+            <div className="text-center py-5">
+              <Spinner animation="border" variant="light" />
+              <p className="mt-2 text-muted">Loading your listings...</p>
             </div>
-
-            {message && <Alert variant={message.type} onClose={() => setMessage(null)} dismissible>{message.text}</Alert>}
-
-            <Card className="card-custom">
-                <Card.Header className="card-header-custom d-flex justify-content-between align-items-center">
-                    All Listings ({properties.filter(p => p.status === 'Available' || p.status === 'Rented').length})
-                </Card.Header>
-                <Card.Body>
-                    {loading ? (
-                        <div className="text-center py-5">
-                            <Spinner animation="border" variant="primary" />
-                            <p className="mt-2 text-muted">Loading properties list...</p>
-                        </div>
-                    ) : (
-                        <PropertyTable 
-                            properties={properties} 
-                            onDelete={handleDeleteProperty} 
-                            onEdit={handleShowEdit} // <--- LINKED TO MODAL
-                        />
-                    )}
-                </Card.Body>
-            </Card>
-
-            {/* Property Add/Edit Modal */}
-            <PropertyFormModal 
-                show={showModal}
-                handleClose={handleCloseModal}
-                property={currentProperty}
-                onSubmit={handleFormSubmit}
+          ) : properties.length > 0 ? (
+            <PropertyTable
+              properties={properties}
+              onDelete={handleDeleteProperty}
+              onEdit={handleShowEdit}
             />
-        </Container>
-    );
+          ) : (
+            <Alert variant="info" className="text-center my-3">
+              You currently have no properties listed.
+            </Alert>
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Add/Edit Modal */}
+      <PropertyFormModal
+        show={showModal}
+        handleClose={handleCloseModal}
+        property={currentProperty}
+        onSubmit={handleFormSubmit}
+      />
+    </Container>
+  );
 };
 
-export default ManageProperties;
-
-
-
+export default MyProperties;

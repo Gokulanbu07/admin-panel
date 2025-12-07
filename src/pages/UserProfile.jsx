@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import UserNavbar from '../components/common/UserNavbar';
+// import UserNavbar from '../components/common/UserNavbar'; // not needed here, page is inside UserLayout
 
 const ACCENT_COLOR = '#D4AF37';
 const BACKGROUND_DARK_COLOR = '#050508';
@@ -15,21 +15,31 @@ const UserProfile = () => {
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    // If not logged in, send to login
+    // redirect if not logged in
     useEffect(() => {
         if (!isAuthenticated) {
             navigate('/login');
         }
     }, [isAuthenticated, navigate]);
 
-    if (!user) {
-        // brief empty state while redirect
-        return null;
-    }
+    if (!user) return null;
 
     const handleLogout = async () => {
         await logout();
         navigate('/login');
+    };
+
+    // helper labels
+    const getRoleBadgeLabel = (role) => {
+        if (role === 'admin') return 'ADMIN';
+        if (role === 'owner') return 'HOUSE OWNER';
+        return 'USER';
+    };
+
+    const getAccountTypeLabel = (role) => {
+        if (role === 'admin') return 'Administrator';
+        if (role === 'owner') return 'House Owner';
+        return 'Standard User';
     };
 
     return (
@@ -125,7 +135,7 @@ const UserProfile = () => {
                                             {user.full_name || 'User'}
                                         </div>
                                         <div className="profile-role">
-                                            {user.role === 'admin' ? 'ADMIN' : 'USER'}
+                                            {getRoleBadgeLabel(user.role)}
                                         </div>
                                     </Col>
                                 </Row>
@@ -138,42 +148,57 @@ const UserProfile = () => {
                                             {user.email || '-'}
                                         </div>
                                     </Col>
+
                                     <Col md={6}>
                                         <div className="profile-label">Phone</div>
                                         <div className="profile-value">
                                             {user.phone_number || 'Not provided'}
                                         </div>
                                     </Col>
+
                                     <Col md={6}>
                                         <div className="profile-label">Account Type</div>
                                         <div className="profile-value">
-                                            {user.role === 'admin'
-                                                ? 'Administrator'
-                                                : 'Standard User'}
+                                            {getAccountTypeLabel(user.role)}
                                         </div>
                                     </Col>
                                 </Row>
 
                                 {/* Actions */}
                                 <div className="profile-actions d-flex flex-wrap gap-2">
+                                    {/* Upgrade button ONLY for standard users */}
+                                    {user.role === 'user' && (
+                                        <Button
+                                            as={Link}
+                                            to="/upgrade-owner"
+                                            className="btn-gold"
+                                        >
+                                            Upgrade to House Owner
+                                        </Button>
+                                    )}
+
+                                    {/* Listings visible only for owners/admin */}
+                                    {(user.role === 'owner' || user.role === 'admin') && (
+                                        <Button
+                                            as={Link}
+                                            to="/my-properties"
+                                            variant="outline-light"
+                                            className="btn-outline-light-profile"
+                                        >
+                                            My Listings
+                                        </Button>
+                                    )}
+
+                                    {/* Admin shortcut */}
                                     {user.role === 'admin' && (
                                         <Button
                                             as={Link}
                                             to="/admin/dashboard"
                                             className="btn-gold"
                                         >
-                                            Go to Admin Dashboard
+                                            Admin Panel
                                         </Button>
                                     )}
-
-                                    <Button
-                                        as={Link}
-                                        to="/my-properties"
-                                        variant="outline-light"
-                                        className="btn-outline-light-profile"
-                                    >
-                                        My Listings
-                                    </Button>
 
                                     <div className="ms-auto">
                                         <Button

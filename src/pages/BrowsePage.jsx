@@ -1,11 +1,17 @@
 // src/pages/BrowsePage.jsx
 
-import React, { useState, useMemo } from 'react';
-import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap';
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+    Container,
+    Row,
+    Col,
+    Card,
+    Button,
+    Form,
+    Badge,
+    Pagination,
+} from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import UserNavbar from '../components/common/UserNavbar';
-import { mockProperties } from '../services/mockData';
-
 
 const BACKGROUND_DARK_COLOR = '#050508';
 const ACCENT_COLOR = '#D4AF37';
@@ -97,20 +103,23 @@ const BrowsePage = () => {
     const [searchText, setSearchText] = useState('');
     const [sortOrder, setSortOrder] = useState('none'); // 'low-high', 'high-low'
 
+    // --- Pagination state ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 6; // properties per page
+
+    // reset to page 1 whenever filters/search change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeCategory, searchText, sortOrder]);
+
     const filteredProperties = useMemo(() => {
         let list = [...ALL_PROPERTIES];
 
         // Filter by category / type
         if (activeCategory !== 'All') {
             list = list.filter((p) => {
-                // For "Rent" show rent type
-                if (activeCategory === 'Rent') {
-                    return p.type === 'Rent';
-                }
-                if (activeCategory === 'Rooms') {
-                    return p.type === 'Rooms';
-                }
-                // For PG / Family / Bachelors, use category field
+                if (activeCategory === 'Rent') return p.type === 'Rent';
+                if (activeCategory === 'Rooms') return p.type === 'Rooms';
                 return p.category === activeCategory;
             });
         }
@@ -135,8 +144,21 @@ const BrowsePage = () => {
         return list;
     }, [activeCategory, searchText, sortOrder]);
 
+    const totalPages = Math.max(1, Math.ceil(filteredProperties.length / pageSize));
+
+    // clamp current page if filters reduced list
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(1);
+        }
+    }, [totalPages, currentPage]);
+
+    const paginatedProperties = useMemo(() => {
+        const start = (currentPage - 1) * pageSize;
+        return filteredProperties.slice(start, start + pageSize);
+    }, [filteredProperties, currentPage]);
+
     const handleViewDetails = (id) => {
-        // later you can connect this with real details page
         navigate(`/properties/${id}`);
     };
 
@@ -145,7 +167,6 @@ const BrowsePage = () => {
             className="browse-page"
             style={{ backgroundColor: BACKGROUND_DARK_COLOR, minHeight: '100vh' }}
         >
-           
             <style jsx="true">{`
                 .browse-wrapper {
                     padding: 3.5rem 0 4rem;
@@ -314,6 +335,24 @@ const BrowsePage = () => {
                     color: #c2c2c2;
                     padding: 2rem 0;
                 }
+
+                .browse-pagination-wrapper {
+                    margin-top: 2rem;
+                }
+                .browse-pagination-wrapper .page-link {
+                    background-color: #0f1017;
+                    border-color: #2a2a35;
+                    color: ${TEXT_LIGHT};
+                }
+                .browse-pagination-wrapper .page-item.active .page-link {
+                    background-color: ${ACCENT_COLOR};
+                    border-color: ${ACCENT_COLOR};
+                    color: #050508;
+                    font-weight: 600;
+                }
+                .browse-pagination-wrapper .page-link:hover {
+                    border-color: ${ACCENT_COLOR};
+                }
             `}</style>
 
             <div className="browse-wrapper">
@@ -377,81 +416,126 @@ const BrowsePage = () => {
                             text.
                         </div>
                     ) : (
-                        <Row className="g-4">
-                            {filteredProperties.map((property) => (
-                                <Col key={property.id} xs={12} md={6} lg={4}>
-                                    <Card className="browse-property-card">
-                                        <div style={{ position: 'relative' }}>
-                                            <Card.Img
-                                                src={property.image}
-                                                alt={property.title}
-                                            />
-                                            <Badge
-                                                bg="dark"
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: '10px',
-                                                    left: '10px',
-                                                    backgroundColor: 'rgba(0,0,0,0.7)',
-                                                    borderRadius: '999px',
-                                                    padding: '0.25rem 0.7rem',
-                                                    fontSize: '0.7rem',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.12em',
-                                                }}
-                                            >
-                                                {property.category}
-                                            </Badge>
-                                        </div>
-                                        <Card.Body className="d-flex flex-column">
-                                            <div className="d-flex justify-content-between align-items-start mb-2">
-                                                <div>
-                                                    <div className="browse-card-title">
-                                                        {property.title}
+                        <>
+                            <Row className="g-4">
+                                {paginatedProperties.map((property) => (
+                                    <Col key={property.id} xs={12} md={6} lg={4}>
+                                        <Card className="browse-property-card">
+                                            <div style={{ position: 'relative' }}>
+                                                <Card.Img
+                                                    src={property.image}
+                                                    alt={property.title}
+                                                />
+                                                <Badge
+                                                    bg="dark"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '10px',
+                                                        left: '10px',
+                                                        backgroundColor:
+                                                            'rgba(0,0,0,0.7)',
+                                                        borderRadius: '999px',
+                                                        padding: '0.25rem 0.7rem',
+                                                        fontSize: '0.7rem',
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '0.12em',
+                                                    }}
+                                                >
+                                                    {property.category}
+                                                </Badge>
+                                            </div>
+                                            <Card.Body className="d-flex flex-column">
+                                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                                    <div>
+                                                        <div className="browse-card-title">
+                                                            {property.title}
+                                                        </div>
+                                                        <div className="browse-card-city">
+                                                            <i className="fas fa-map-marker-alt me-1"></i>
+                                                            {property.city}
+                                                        </div>
                                                     </div>
-                                                    <div className="browse-card-city">
-                                                        <i className="fas fa-map-marker-alt me-1"></i>
-                                                        {property.city}
+                                                    <div className="text-end">
+                                                        <div className="browse-price">
+                                                            ₹
+                                                            {property.price.toLocaleString(
+                                                                'en-IN'
+                                                            )}
+                                                        </div>
+                                                        <div className="browse-tag">
+                                                            {property.type === 'PG'
+                                                                ? 'PG / Sharing'
+                                                                : property.type}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-end">
-                                                    <div className="browse-price">
-                                                        ₹{property.price.toLocaleString('en-IN')}
-                                                    </div>
-                                                    <div className="browse-tag">
-                                                        {property.type === 'PG'
-                                                            ? 'PG / Sharing'
-                                                            : property.type}
-                                                    </div>
+
+                                                <div className="d-flex justify-content-between browse-meta mb-3">
+                                                    <span>
+                                                        <i className="fas fa-bed me-1"></i>
+                                                        {property.beds} Beds
+                                                    </span>
+                                                    <span>
+                                                        <i className="fas fa-bath me-1"></i>
+                                                        {property.baths} Baths
+                                                    </span>
+                                                    <span>
+                                                        <i className="fas fa-star me-1"></i>
+                                                        {property.tag}
+                                                    </span>
                                                 </div>
-                                            </div>
 
-                                            <div className="d-flex justify-content-between browse-meta mb-3">
-                                                <span>
-                                                    <i className="fas fa-bed me-1"></i>
-                                                    {property.beds} Beds
-                                                </span>
-                                                <span>
-                                                    <i className="fas fa-bath me-1"></i>
-                                                    {property.baths} Baths
-                                                </span>
-                                                <span>
-                                                    <i className="fas fa-star me-1"></i>
-                                                    {property.tag}
-                                                </span>
-                                            </div>
+                                                <Button
+                                                    className="mt-auto browse-btn-details"
+                                                    onClick={() =>
+                                                        handleViewDetails(property.id)
+                                                    }
+                                                >
+                                                    View Details
+                                                </Button>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                ))}
+                            </Row>
 
-                                            <Button
-                                                className="mt-auto browse-btn-details"
-                                                onClick={() => handleViewDetails(property.id)}
-                                            >
-                                                View Details
-                                            </Button>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="browse-pagination-wrapper">
+                                    <Pagination className="justify-content-center mb-0">
+                                        <Pagination.Prev
+                                            disabled={currentPage === 1}
+                                            onClick={() =>
+                                                setCurrentPage((p) =>
+                                                    Math.max(1, p - 1)
+                                                )
+                                            }
+                                        />
+                                        {Array.from({ length: totalPages }).map(
+                                            (_, index) => (
+                                                <Pagination.Item
+                                                    key={index + 1}
+                                                    active={currentPage === index + 1}
+                                                    onClick={() =>
+                                                        setCurrentPage(index + 1)
+                                                    }
+                                                >
+                                                    {index + 1}
+                                                </Pagination.Item>
+                                            )
+                                        )}
+                                        <Pagination.Next
+                                            disabled={currentPage === totalPages}
+                                            onClick={() =>
+                                                setCurrentPage((p) =>
+                                                    Math.min(totalPages, p + 1)
+                                                )
+                                            }
+                                        />
+                                    </Pagination>
+                                </div>
+                            )}
+                        </>
                     )}
                 </Container>
             </div>
@@ -460,3 +544,4 @@ const BrowsePage = () => {
 };
 
 export default BrowsePage;
+ 

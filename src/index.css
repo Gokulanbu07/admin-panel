@@ -1,6 +1,9 @@
 /* src/index.css */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+@import "./styles/admin-theme.css";
+
+
 :root {
   --primary-color: #4338ca; /* Indigo */
   --secondary-color: #64748b; /* Slate */

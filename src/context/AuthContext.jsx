@@ -131,6 +131,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+     const upgradeToOwner = () => {
+        if (!user) return;
+        setUser(prev =>
+            prev
+                ? { ...prev, role: 'houseowner' } // your app already uses 'houseowner'
+                : prev
+        );
+    };
+
     const value = useMemo(
         () => ({
             user,
@@ -139,6 +148,7 @@ export const AuthProvider = ({ children }) => {
             register,
             logout,
             isAuthenticated: !!user,
+            upgradeToOwner,
         }),
         [user, isLoading]
     );

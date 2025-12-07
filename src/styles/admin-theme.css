@@ -1,0 +1,91 @@
+/* ===========================
+   ADMIN THEME - BLACK & GOLD
+=========================== */
+
+:root {
+  --admin-bg: #0c0c0f;
+  --admin-card-bg: #15151c;
+  --admin-text: #f5f5f5;
+  --admin-muted: #a2a2a2;
+  --admin-gold: #d4af37;
+  --admin-border: rgba(212, 175, 55, 0.25);
+  --admin-hover: rgba(212, 175, 55, 0.15);
+  --admin-danger: #e74c3c;
+}
+
+/* Page background */
+body {
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+}
+
+/* Admin Cards */
+.card-custom {
+  background: var(--admin-card-bg) !important;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  border-radius: 14px;
+}
+
+.card-header-custom {
+  background: rgba(255, 255, 255, 0.05) !important;
+  font-weight: 600;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-gold) !important;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-primary-custom {
+  background: var(--admin-gold) !important;
+  border-color: var(--admin-gold) !important;
+  color: #000 !important;
+  font-weight: 600;
+  transition: 0.25s;
+  border-radius: 50px;
+}
+
+.btn-primary:hover {
+  background: #b9972f !important;
+}
+
+/* Table Styling */
+.table-custom {
+  background: var(--admin-card-bg);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.table-custom thead {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--admin-gold);
+  font-weight: 600;
+}
+
+.table-custom tbody tr:hover {
+  background: var(--admin-hover);
+  transition: 0.3s ease-in-out;
+}
+
+/* Badges Fix */
+.badge {
+  font-size: 0.75rem;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+  color: var(--admin-muted);
+  border: none;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--admin-gold);
+  border-bottom: 2px solid var(--admin-gold);
+}
+
+/* Alerts */
+.alert {
+  border-radius: 12px;
+}

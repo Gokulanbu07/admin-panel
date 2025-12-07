@@ -97,7 +97,7 @@ const MyProperties = () => {
 
     return (
         <Container fluid className="p-0">
-            <h2 className="mb-4 fw-bold">🏡 My Listings</h2>
+            <h2 className="mb-4 fw-bold">My Listings</h2>
             
             <div className="d-flex justify-content-end mb-3">
                 <Button variant="primary" onClick={handleShowAdd}>

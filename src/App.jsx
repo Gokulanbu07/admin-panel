@@ -33,6 +33,14 @@ import Dashboard from './pages/admin/Dashboard';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageProperties from './pages/admin/ManageProperties';
 import ManageBookings from './pages/admin/ManageBooking';
+import AdminChats from './pages/admin/AdminChats';
+import UpgradeOwnerPage from './pages/UpgradeOwnerPage';
+
+
+
+
+
+
 
 // Simple placeholder
 const MyVisits = () => (
@@ -89,6 +97,17 @@ function App() {
           <Route path="contact" element={<ContactUsPage />} />
           <Route path="browse" element={<BrowsePage />} />
 
+          <Route
+  path="upgrade-owner"
+  element={
+    <ProtectedRoute>
+      <UpgradeOwnerPage />
+    </ProtectedRoute>
+  }
+/>
+
+
+
           {/* Property routes (public + protected) */}
           <Route path="properties/:id" element={<PropertyDetailPage />} />
 
@@ -102,13 +121,13 @@ function App() {
           />
 
           <Route
-  path="chats"
-  element={
-    <ProtectedRoute>
-      <MyMessagesPage />
-    </ProtectedRoute>
-  }
-/>
+            path="chats"
+            element={
+              <ProtectedRoute>
+                <MyMessagesPage />
+              </ProtectedRoute>
+            }
+          />
 
 <Route
   path="chats/:propertyId"
@@ -203,6 +222,10 @@ function App() {
           <Route path="users" element={<ManageUsers />} />
           <Route path="properties" element={<ManageProperties />} />
           <Route path="bookings" element={<ManageBookings />} />
+
+          <Route path="chats" element={<AdminChats />} />
+
+
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
 
